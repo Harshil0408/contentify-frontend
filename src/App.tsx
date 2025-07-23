@@ -1,31 +1,44 @@
+// -------------------- External Libraries --------------------
 import { Route, Routes } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import Signup from "./pages/SignUp";
-import SignIn from "./pages/SignIn";
-import Onboarding from "./pages/Onboarding";
-import AuthWrapper from "./components/AuthWrapper";
-import { ROUTER } from "./routes";
-import OAuthSuccess from "./components/OAuthSuccess ";
-import PageNotFound from "./components/PageNotFound";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+// -------------------- Redux & Store --------------------
 import type { AppDispatch, RootState } from "./store/store";
-import { setAuthToken } from "./constants/function";
-import Home from "./pages/Home";
-import Layout from "./components/Layout";
-import Subscriptions from "./pages/Subscriptions";
-import History from "./pages/History";
-import Playlist from "./pages/Playlist";
-import YourVideos from "./pages/YourVideos";
-import LikedVideos from "./pages/LikedVideos";
-import Downloads from "./pages/Downloads";
-import Settings from "./pages/Settings";
-import ReportHistory from "./pages/ReportHistory";
-import WatchLater from "./pages/WatchLater";
-import Video from "./pages/Video";
-import { socket } from "./utils/socket";
 import { addNotifications } from "./store/slices/notificationSlice";
 
+// -------------------- Utils & Constants --------------------
+import { setAuthToken } from "./constants/function";
+import { ROUTER } from "./routes";
+import { socket } from "./utils/socket";
+
+// -------------------- Layout & Wrappers --------------------
+import AuthWrapper from "./components/AuthWrapper";
+import Layout from "./components/Layout";
+
+// -------------------- Pages --------------------
+
+import PageNotFound from "./components/PageNotFound";
+import OAuthSuccess from "./components/OAuthSuccess ";
+
+import {
+  Dashboard,
+  Downloads,
+  History,
+  Home,
+  LikedVideos,
+  Onboarding,
+  Playlist,
+  ReportHistory,
+  Settings,
+  SignIn,
+  SignUp,
+  Subscriptions,
+  Video,
+  WatchLater,
+  YourVideos,
+
+} from './utils/export'
 
 
 const App = () => {
@@ -37,7 +50,7 @@ const App = () => {
     socket.on("notify-channel-owner", (data) => {
       console.log("Received notification from socket:", data);
       dispatch(addNotifications({
-        message: data.message 
+        message: data.message
       }))
     })
 
@@ -69,7 +82,7 @@ const App = () => {
       <Route path={ROUTER.WATCH_LATER} element={<AuthWrapper isPrivate><Layout><WatchLater /></Layout></AuthWrapper>} />
       <Route path={ROUTER.OAUTH_SUCCESS} element={<AuthWrapper ><OAuthSuccess /></AuthWrapper>} />
       <Route path={ROUTER.SIGN_IN} element={<AuthWrapper><SignIn /></AuthWrapper>} />
-      <Route path={ROUTER.SIGN_UP} element={<AuthWrapper><Signup /></AuthWrapper>} />
+      <Route path={ROUTER.SIGN_UP} element={<AuthWrapper><SignUp /></AuthWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

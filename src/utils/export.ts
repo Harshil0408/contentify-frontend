@@ -1,0 +1,15 @@
+export { default as Dashboard } from '../pages/Dashboard';
+export { default as Downloads } from '../pages/Downloads';
+export { default as History } from '../pages/History';
+export { default as Home } from '../pages/Home';
+export { default as LikedVideos } from '../pages/LikedVideos';
+export { default as Onboarding } from '../pages/Onboarding';
+export { default as Playlist } from '../pages/Playlist';
+export { default as ReportHistory } from '../pages/ReportHistory';
+export { default as Settings } from '../pages/Settings';
+export { default as SignIn } from '../pages/SignIn';
+export { default as SignUp } from '../pages/SignUp';
+export { default as Subscriptions } from '../pages/Subscriptions';
+export { default as Video } from '../pages/Video';
+export { default as WatchLater } from '../pages/WatchLater';
+export { default as YourVideos } from '../pages/YourVideos';

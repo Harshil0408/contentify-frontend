@@ -1,5 +1,6 @@
 import type { AppDispatch, RootState } from "@/store/store"
 import { getUserWatchHistory } from "@/store/thunks/videoThunk"
+import type { VideoListItem } from "@/types/types"
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
@@ -21,12 +22,14 @@ const History = () => {
   const dispatch = useDispatch<AppDispatch>()
   const navigate = useNavigate()
   const { watchHistory } = useSelector((state: RootState) => state.video)
+  const { videoWatchProgress } = useSelector((state: RootState) => state.video)
+
 
   useEffect(() => {
     dispatch(getUserWatchHistory())
   }, [dispatch])
 
-  const historyArray = Array.isArray(watchHistory) ? watchHistory : watchHistory.data ?? [];
+  const historyArray = watchHistory;
 
   if (historyArray.length === 0) {
     return <div className="p-8 text-center text-gray-500">No watch history yet.</div>;
@@ -37,7 +40,7 @@ const History = () => {
       <div className="flex-1 w-full max-w-4xl mx-auto">
         <h2 className="mb-6 text-2xl font-semibold text-gray-900">Watch History</h2>
         <div className="flex flex-col gap-6">
-          {historyArray.map(video => (
+          {historyArray.map((video: VideoListItem) => (
             <div
               onClick={() => navigate(`/video/${video._id}`)}
               key={video._id}
@@ -49,6 +52,16 @@ const History = () => {
                   alt={video.title}
                   className="w-[180px] h-[100px] object-cover rounded-lg bg-gray-200 group-hover:brightness-90 transition"
                 />
+                {videoWatchProgress !== null && (
+                  <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-300">
+                    <div
+                      className="h-full bg-red-500"
+                      style={{
+                        width: `${(videoWatchProgress?.[video._id]?.watchPercentage || 0)}%`,
+                      }}
+                    />
+                  </div>
+                )}
                 <span className="absolute right-2 bottom-2 bg-black/80 text-white text-xs rounded px-2 py-0.5">
                   {formatDuration(video.duration)}
                 </span>

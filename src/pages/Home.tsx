@@ -1,21 +1,24 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllVideos } from "@/store/thunks/videoThunk";
+import { getAllVideos, getVideoWatchProgress } from "@/store/thunks/videoThunk";
 import type { AppDispatch, RootState } from "@/store/store";
 import VideoCard from "@/components/VideoCard";
 import VideoCardSkeleton from "@/components/VideoCardSkeleton";
+import ErrorRetry from "@/components/ErrorRetry";
 
 const Home = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { allVideos, isLoading, error } = useSelector((state: RootState) => state.video);
 
+
     useEffect(() => {
         dispatch(getAllVideos());
+        dispatch(getVideoWatchProgress())
     }, [dispatch]);
 
 
     if (error) {
-        return <div className="flex justify-center items-center h-96 text-xl text-red-500 font-semibold">{error}</div>;
+        return <ErrorRetry message={error} onRetry={() => dispatch(getAllVideos())} />
     }
 
     if (isLoading) {

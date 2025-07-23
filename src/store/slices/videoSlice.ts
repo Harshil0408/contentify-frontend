@@ -1,15 +1,37 @@
-import type { RecommendedVideos, SingleVideo, VideoState, WatchHistoryResponse, WatchProgress } from "@/types/types";
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllVideos, getRecommandedVideosForUser, getSingleVideo, getUserWatchHistory, getVideoWatchProgress, toggleLikeVideo, toggleSubscribeVideo } from "../thunks/videoThunk";
+import {
+    getAllVideos,
+    getSingleVideo,
+    getUserWatchHistory,
+    toggleLikeVideo,
+    getRecommandedVideosForUser,
+    toggleSubscribeVideo,
+    getVideoWatchProgress,
+    getLikedVideosOfUser,
+    getUsersVideo,
+    updateVideoWatchProgress,
+} from "../thunks/videoThunk";
 
-export type VideosSliceState = {
-    allVideos: VideoState | null;
-    singleVideo: SingleVideo | null;
-    watchHistory: WatchHistoryResponse | [];
-    recommendedVideos: RecommendedVideos | [];
-    videoWatchProgress: WatchProgress | null;
+import type {
+    RecommendedVideo,
+    WatchProgress,
+    LikedVideo,
+    PaginatedVideoData,
+    VideoPaginationData,
+    VideoDetail,
+    VideoListItem,
+} from "../../types/types";
+
+type VideosSliceState = {
+    allVideos: VideoPaginationData | null;
+    singleVideo: VideoDetail | null;
+    watchHistory: VideoListItem[] | [];
+    recommendedVideos: RecommendedVideo[];
+    videoWatchProgress: { [videoId: string]: WatchProgress };
+    likedVideos: LikedVideo[];
+    userVideos: PaginatedVideoData | null;
     isLoading: boolean;
-    error: string | null
+    error: string | null;
 };
 
 const initialState: VideosSliceState = {
@@ -17,165 +39,141 @@ const initialState: VideosSliceState = {
     singleVideo: null,
     watchHistory: [],
     recommendedVideos: [],
-    videoWatchProgress: null,
+    videoWatchProgress: {},
+    likedVideos: [],
+    userVideos: null,
     isLoading: false,
-    error: null
+    error: null,
 };
 
 export const videoSlice = createSlice({
-    name: 'video',
+    name: "video",
     initialState,
-    reducers: {
+    reducers: {},
 
-    },
     extraReducers: (builder) => {
         builder.addCase(getAllVideos.pending, (state) => {
-            return {
-                ...state,
-                isLoading: true,
-                error: null
-            }
-        })
+            state.isLoading = true;
+            state.error = null;
+        });
         builder.addCase(getAllVideos.fulfilled, (state, action) => {
-            return {
-                ...state,
-                allVideos: action.payload,
-                isLoading: false,
-                error: null
-            }
-        })
+            state.allVideos = action.payload;
+            state.isLoading = false;
+        });
         builder.addCase(getAllVideos.rejected, (state, action) => {
-            return {
-                ...state,
-                error: (action.payload as string) ?? "Something went wrong",
-                isLoading: false
-            }
-        })
+            state.error = (action.payload as string) ?? "Failed to fetch videos";
+            state.isLoading = false;
+        });
+
         builder.addCase(getSingleVideo.pending, (state) => {
-            return {
-                ...state,
-                isLoading: true,
-                error: null
-            }
-        })
+            state.isLoading = true;
+            state.error = null;
+        });
         builder.addCase(getSingleVideo.fulfilled, (state, action) => {
-            return {
-                ...state,
-                singleVideo: action.payload,
-                error: null
-            }
-        })
+            state.singleVideo = action.payload;
+            state.isLoading = false;
+        });
         builder.addCase(getSingleVideo.rejected, (state, action) => {
-            return {
-                ...state,
-                error: (action.payload as string) ?? "Something went wrong",
-                isLoading: false
-            }
-        })
+            state.error = (action.payload as string) ?? "Failed to fetch video";
+            state.isLoading = false;
+        });
+
         builder.addCase(getUserWatchHistory.pending, (state) => {
-            return {
-                ...state,
-                isLoading: true,
-                error: null
-            }
-        })
+            state.isLoading = true;
+            state.error = null;
+        });
         builder.addCase(getUserWatchHistory.fulfilled, (state, action) => {
-            return {
-                ...state,
-                watchHistory: action.payload.data,
-                isLoading: false,
-                error: null
-            }
-        })
+            state.watchHistory = action.payload.data;
+            state.isLoading = false;
+        });
         builder.addCase(getUserWatchHistory.rejected, (state, action) => {
-            return {
-                ...state,
-                error: (action.payload as string) ?? "Something went wrong",
-                isLoading: false
-            }
-        })
-        builder.addCase(toggleLikeVideo.pending, (state) => {
-            return {
-                ...state,
-                isLoading: true
-            }
-        })
+            state.error = (action.payload as string) ?? "Failed to fetch watch history";
+            state.isLoading = false;
+        });
+
         builder.addCase(toggleLikeVideo.fulfilled, (state) => {
             if (state.singleVideo) {
-                state.singleVideo = {
-                    ...state.singleVideo,
-                    isLiked: !state.singleVideo.isLiked
-                };
-            }
-        })
-        builder.addCase(toggleLikeVideo.rejected, (state, action) => {
-            return {
-                ...state,
-                error: (action.payload as string) ?? "Something went wrong"
-            }
-        })
-        builder.addCase(getRecommandedVideosForUser.pending, (state) => {
-            return {
-                ...state,
-                isLoading: true,
-                error: null
-            }
-        })
-        builder.addCase(getRecommandedVideosForUser.fulfilled, (state, action) => {
-            return {
-                ...state,
-                recommendedVideos: action.payload?.data,
-                isLoading: false,
-                error: null
-            }
-        })
-        builder.addCase(getRecommandedVideosForUser.rejected, (state, action) => {
-            return {
-                ...state,
-                error: (action.payload as string) ?? "Something went wrong",
-                isLoading: false
-            }
-        })
-        builder.addCase(toggleSubscribeVideo.pending, (state) => {
-            return {
-                ...state,
-                isLoading: true,
-                error: null
-            }
-        })
-        builder.addCase(toggleSubscribeVideo.fulfilled, (state) => {
-            if (state.singleVideo) {
-                state.singleVideo = {
-                    ...state.singleVideo,
-                    isSubscribed: !state.singleVideo?.isSubscribed
+                state.singleVideo.isLiked = !state.singleVideo.isLiked
+                if (state.singleVideo.isLiked === true) {
+                    state.singleVideo.likeCount += 1
+                } else {
+                    state.singleVideo.likeCount -= 1
                 }
             }
-        })
-        builder.addCase(toggleSubscribeVideo.rejected, (state, action) => {
-            return {
-                ...state,
-                error: (action.payload as string) ?? "Something went wrong"
+        });
+
+        builder.addCase(getRecommandedVideosForUser.pending, (state) => {
+            state.isLoading = true;
+            state.error = null;
+        });
+        builder.addCase(getRecommandedVideosForUser.fulfilled, (state, action) => {
+            state.recommendedVideos = action.payload.data;
+            state.isLoading = false;
+        });
+        builder.addCase(getRecommandedVideosForUser.rejected, (state, action) => {
+            state.error = (action.payload as string) ?? "Failed to fetch recommended videos";
+            state.isLoading = false;
+        });
+
+        builder.addCase(toggleSubscribeVideo.fulfilled, (state) => {
+            if (state.singleVideo) {
+                state.singleVideo.isSubscribed = !state.singleVideo.isSubscribed
             }
-        })
+        });
+
         builder.addCase(getVideoWatchProgress.pending, (state) => {
-            return {
-                ...state,
-                isLoading: true
-            }
-        })
+            state.isLoading = true;
+            state.error = null;
+        });
         builder.addCase(getVideoWatchProgress.fulfilled, (state, action) => {
-            return {
-                ...state,
-                videoWatchProgress: action.payload.data,
-                isLoading: false
-            }
-        })
+            state.videoWatchProgress = action.payload.data;
+            state.isLoading = false;
+        });
         builder.addCase(getVideoWatchProgress.rejected, (state, action) => {
-            return {
-                ...state,
-                error: (action.payload as string) ?? "Something went wrong",
-                isLoading: false
-            }
+            state.error = (action.payload as string) ?? "Failed to fetch video progress";
+            state.isLoading = false;
+        });
+
+        builder.addCase(updateVideoWatchProgress.pending, (state) => {
+            state.isLoading = true;
+            state.error = null;
         })
-    }
-})
+        builder.addCase(updateVideoWatchProgress.fulfilled, (state, action) => {
+            const progress = action.payload.data;
+            state.videoWatchProgress[progress.video] = progress
+        })
+        builder.addCase(updateVideoWatchProgress.rejected, (state, action) => {
+            state.isLoading = false;
+            state.error = action.payload?.message as string
+        })
+
+        builder.addCase(getLikedVideosOfUser.pending, (state) => {
+            state.isLoading = true;
+            state.error = null;
+        });
+        builder.addCase(getLikedVideosOfUser.fulfilled, (state, action) => {
+            state.likedVideos = action.payload.data.videos;
+            state.isLoading = false;
+        });
+        builder.addCase(getLikedVideosOfUser.rejected, (state, action) => {
+            state.error = (action.payload as string) ?? "Failed to fetch liked videos";
+            state.isLoading = false;
+        });
+
+        // User's Videos
+        builder.addCase(getUsersVideo.pending, (state) => {
+            state.isLoading = true;
+            state.error = null;
+        });
+        builder.addCase(getUsersVideo.fulfilled, (state, action) => {
+            state.userVideos = action.payload.data;
+            state.isLoading = false;
+        });
+        builder.addCase(getUsersVideo.rejected, (state, action) => {
+            state.error = (action.payload as string) ?? "Failed to fetch user's videos";
+            state.isLoading = false;
+        });
+    },
+});
+
+export default videoSlice.reducer;

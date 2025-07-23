@@ -1,8 +1,7 @@
-import type { PublishVideoForm } from "@/types/types";
+import type { ErrorResponseThunk, GetLikedVideosResponse, GetRecommendedVideosResponse, GetUserVideosResponse, GetVideoByIdResponse, GetVideoProgressResponse, GetVideosResponse, GetWatchHistoryResponse, LikeVideoResponse, PublishVideoForm, ToggleSubscribeVideoResponse, UpdateWatchProgressPayload, UpdateWatchProgressResponse } from "@/types/types";
 import axiosInstance from "@/utils/axios";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
-
 
 export const publishVideoThunk = createAsyncThunk(
     'video/publish-video',
@@ -31,11 +30,11 @@ export const publishVideoThunk = createAsyncThunk(
     }
 )
 
-export const getAllVideos = createAsyncThunk(
+export const getAllVideos = createAsyncThunk<GetVideosResponse["data"], void>(
     'video/getAllVideo',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.get('/video')
+            const response = await axiosInstance.get<GetVideosResponse>('/video')
             return response.data?.data
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -46,11 +45,11 @@ export const getAllVideos = createAsyncThunk(
     }
 )
 
-export const getSingleVideo = createAsyncThunk(
+export const getSingleVideo = createAsyncThunk<GetVideoByIdResponse["data"], string>(
     'video/getSingleVideo',
     async (videoId: string, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.get(`/video/${videoId}`)
+            const response = await axiosInstance.get<GetVideoByIdResponse>(`/video/${videoId}`)
             return response.data?.data
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -61,11 +60,11 @@ export const getSingleVideo = createAsyncThunk(
     }
 )
 
-export const getUserWatchHistory = createAsyncThunk(
+export const getUserWatchHistory = createAsyncThunk<GetWatchHistoryResponse, void>(
     'video/getUserWatchHistory',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.get('/video/video/getWatchHistory')
+            const response = await axiosInstance.get<GetWatchHistoryResponse>('/video/video/getWatchHistory')
             return response.data
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -76,11 +75,11 @@ export const getUserWatchHistory = createAsyncThunk(
     }
 )
 
-export const toggleLikeVideo = createAsyncThunk(
+export const toggleLikeVideo = createAsyncThunk<LikeVideoResponse<null>, string>(
     'video/toggleLikeVideo',
     async (videoId: string, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post(`/like/like-video/${videoId}`)
+            const response = await axiosInstance.post<LikeVideoResponse<null>>(`/like/like-video/${videoId}`)
             return response.data
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -91,11 +90,11 @@ export const toggleLikeVideo = createAsyncThunk(
     }
 )
 
-export const getRecommandedVideosForUser = createAsyncThunk(
+export const getRecommandedVideosForUser = createAsyncThunk<GetRecommendedVideosResponse, string>(
     'video/getRecommandedVideos',
     async (videoId: string, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.get(`/video/recommend-video?currentVideoId=${videoId}`)
+            const response = await axiosInstance.get<GetRecommendedVideosResponse>(`/video/recommend-video?currentVideoId=${videoId}`)
             return response.data
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -106,11 +105,11 @@ export const getRecommandedVideosForUser = createAsyncThunk(
     }
 )
 
-export const toggleSubscribeVideo = createAsyncThunk(
+export const toggleSubscribeVideo = createAsyncThunk<ToggleSubscribeVideoResponse<null>, string>(
     '/video/toggleSubscribeVideo',
     async (channelId: string, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post(`/subscription/toggle-subscribe/${channelId}`)
+            const response = await axiosInstance.post<ToggleSubscribeVideoResponse<null>>(`/subscription/toggle-subscribe/${channelId}`)
             return response.data
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -121,7 +120,7 @@ export const toggleSubscribeVideo = createAsyncThunk(
     }
 )
 
-export const updateVideoWatchProgress = createAsyncThunk(
+export const updateVideoWatchProgress = createAsyncThunk<UpdateWatchProgressResponse, UpdateWatchProgressPayload, { rejectValue: ErrorResponseThunk }>(
     'video/updateVideoWatchProgress',
     async (
         { videoId, watchedTime }: { videoId: string; watchedTime: number },
@@ -134,6 +133,24 @@ export const updateVideoWatchProgress = createAsyncThunk(
             })
             return response.data
         } catch (error) {
+            return rejectWithValue({
+                statusCode: 500,
+                message: error as string,
+                success: false,
+            });
+        }
+    }
+)
+
+export const getVideoWatchProgress = createAsyncThunk<GetVideoProgressResponse, void>(
+    'video/getVideoWatchProgress',
+    async (_,
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await axiosInstance.get<GetVideoProgressResponse>(`/video/video/watch-progress`)
+            return response.data
+        } catch (error) {
             if (error instanceof AxiosError) {
                 return rejectWithValue(error.response?.data)
             }
@@ -142,14 +159,26 @@ export const updateVideoWatchProgress = createAsyncThunk(
     }
 )
 
-export const getVideoWatchProgress = createAsyncThunk(
-    'video/getVideoWatchProgress',
-    async (
-        { videoId }: { videoId: string; },
-        { rejectWithValue }
-    ) => {
+export const getLikedVideosOfUser = createAsyncThunk<GetLikedVideosResponse, void>(
+    'video/getLikedVideoOfUser',
+    async (_, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.get(`/video/watch-progress/${videoId}`)
+            const response = await axiosInstance.get<GetLikedVideosResponse>('/video/like-videos/user')
+            return response.data
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                return rejectWithValue(error.response?.data)
+            }
+            return rejectWithValue(error)
+        }
+    }
+)
+
+export const getUsersVideo = createAsyncThunk<GetUserVideosResponse, void>(
+    'video/getUsersVideo',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.get<GetUserVideosResponse>('/video/user/user-videos')
             return response.data
         } catch (error) {
             if (error instanceof AxiosError) {

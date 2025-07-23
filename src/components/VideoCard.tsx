@@ -4,6 +4,8 @@ import type { VideoDoc } from "@/types/types";
 import { useNavigate } from "react-router-dom";
 import { ROUTER } from "@/routes";
 import { formatDuration, formatViews, timeAgo } from "@/constants/function";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
 
 interface VideoCardProps {
   video: VideoDoc;
@@ -13,6 +15,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
   const navigate = useNavigate()
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { videoWatchProgress } = useSelector((state: RootState) => state.video)
 
   React.useEffect(() => {
     if (isHovered && videoRef.current) {
@@ -51,6 +54,16 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
             preload="none"
             poster={video.thumbnail}
           />
+        )}
+        {videoWatchProgress !== null && (
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-300">
+            <div
+              className="h-full bg-red-500"
+              style={{
+                width: `${(videoWatchProgress?.[video._id]?.watchPercentage || 0)}%`,
+              }}
+            />
+          </div>
         )}
         <span className="absolute bottom-1.5 right-2 bg-black bg-opacity-80 text-white text-xs px-1.5 py-0.5 rounded-sm">
           {formatDuration(video.duration)}
