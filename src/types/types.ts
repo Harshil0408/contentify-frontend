@@ -373,3 +373,51 @@ export interface UpdateWatchProgressPayload {
     videoId: string;
     watchedTime: number;
 }
+
+export interface SubscribedVideosResponse {
+    statusCode: number;
+    data: SubscribedVideoData;
+    message: string;
+    success: boolean;
+  }
+  
+  export interface SubscribedVideoData {
+    docs: VideoDocument[];
+    totalDocs: number;
+    limit: number;
+    page: number;
+    totalPages: number;
+    pagingCounter: number;
+    hasPrevPage: boolean;
+    hasNextPage: boolean;
+    prevPage: number | null;
+    nextPage: number | null;
+  }
+  
+  export interface VideoDocument {
+    _id: string;
+    title: string;
+    description: string;
+    videoFile: string;
+    videoPublicId: string;
+    thumbnail: string;
+    thumbnailPublicId: string;
+    duration: string;
+    category: string;
+    owner: string;
+    views: number;
+    downloads: number;
+    tags: string[];
+    isPublished: boolean;
+    isDeleted: boolean;
+    isPrivate: boolean;
+    allowedUsers: string[];
+    reportedBy: string[];
+    reportReason: string;
+    language: string;
+    averageWatchTime: number;
+    createdAt: string; 
+    updatedAt: string; 
+    __v: number;
+  }
+  

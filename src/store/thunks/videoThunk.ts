@@ -1,4 +1,4 @@
-import type { ErrorResponseThunk, GetLikedVideosResponse, GetRecommendedVideosResponse, GetUserVideosResponse, GetVideoByIdResponse, GetVideoProgressResponse, GetVideosResponse, GetWatchHistoryResponse, LikeVideoResponse, PublishVideoForm, ToggleSubscribeVideoResponse, UpdateWatchProgressPayload, UpdateWatchProgressResponse } from "@/types/types";
+import type { ErrorResponseThunk, GetLikedVideosResponse, GetRecommendedVideosResponse, GetUserVideosResponse, GetVideoByIdResponse, GetVideoProgressResponse, GetVideosResponse, GetWatchHistoryResponse, LikeVideoResponse, PublishVideoForm, SubscribedVideosResponse, ToggleSubscribeVideoResponse, UpdateWatchProgressPayload, UpdateWatchProgressResponse } from "@/types/types";
 import axiosInstance from "@/utils/axios";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
@@ -137,7 +137,7 @@ export const updateVideoWatchProgress = createAsyncThunk<UpdateWatchProgressResp
                 statusCode: 500,
                 message: error as string,
                 success: false,
-            });
+            }); 
         }
     }
 )
@@ -179,6 +179,21 @@ export const getUsersVideo = createAsyncThunk<GetUserVideosResponse, void>(
     async (_, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.get<GetUserVideosResponse>('/video/user/user-videos')
+            return response.data
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                return rejectWithValue(error.response?.data)
+            }
+            return rejectWithValue(error)
+        }
+    }
+)
+
+export const getSubscribedChannelVideos = createAsyncThunk<SubscribedVideosResponse, void>(
+    'video/getSubscribedChannelVideos',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.get<SubscribedVideosResponse>('/subscription/subscribed-videos')
             return response.data
         } catch (error) {
             if (error instanceof AxiosError) {

@@ -10,6 +10,7 @@ import {
     getLikedVideosOfUser,
     getUsersVideo,
     updateVideoWatchProgress,
+    getSubscribedChannelVideos,
 } from "../thunks/videoThunk";
 
 import type {
@@ -20,6 +21,7 @@ import type {
     VideoPaginationData,
     VideoDetail,
     VideoListItem,
+    SubscribedVideoData,
 } from "../../types/types";
 
 type VideosSliceState = {
@@ -30,6 +32,7 @@ type VideosSliceState = {
     videoWatchProgress: { [videoId: string]: WatchProgress };
     likedVideos: LikedVideo[];
     userVideos: PaginatedVideoData | null;
+    subscribedChannelVideos: SubscribedVideoData | null,
     isLoading: boolean;
     error: string | null;
 };
@@ -42,6 +45,7 @@ const initialState: VideosSliceState = {
     videoWatchProgress: {},
     likedVideos: [],
     userVideos: null,
+    subscribedChannelVideos: null,
     isLoading: false,
     error: null,
 };
@@ -173,6 +177,19 @@ export const videoSlice = createSlice({
             state.error = (action.payload as string) ?? "Failed to fetch user's videos";
             state.isLoading = false;
         });
+        builder.addCase(getSubscribedChannelVideos.pending, (state) => {
+            state.isLoading = true;
+            state.error = null;
+        })
+        builder.addCase(getSubscribedChannelVideos.fulfilled, (state, action) => {
+            state.subscribedChannelVideos = action.payload.data;
+            state.error = null;
+            state.isLoading = false
+        })
+        builder.addCase(getSubscribedChannelVideos.rejected, (state, action) => {
+            state.error = (action.payload as string) ?? "Something went wrong";
+            state.isLoading = false
+        })
     },
 });
 

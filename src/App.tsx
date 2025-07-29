@@ -1,16 +1,14 @@
 // -------------------- External Libraries --------------------
 import { Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 // -------------------- Redux & Store --------------------
-import type { AppDispatch, RootState } from "./store/store";
-import { addNotifications } from "./store/slices/notificationSlice";
+import type { RootState } from "./store/store";
 
 // -------------------- Utils & Constants --------------------
 import { setAuthToken } from "./constants/function";
 import { ROUTER } from "./routes";
-import { socket } from "./utils/socket";
 
 // -------------------- Layout & Wrappers --------------------
 import AuthWrapper from "./components/AuthWrapper";
@@ -44,20 +42,8 @@ import {
 const App = () => {
 
   const token = useSelector((state: RootState) => state.auth.token)
-  const dispatch = useDispatch<AppDispatch>()
 
-  useEffect(() => {
-    socket.on("notify-channel-owner", (data) => {
-      console.log("Received notification from socket:", data);
-      dispatch(addNotifications({
-        message: data.message
-      }))
-    })
 
-    return () => {
-      socket.off("notify-channel-owner")
-    }
-  }, [dispatch])
 
   useEffect(() => {
     if (token) {

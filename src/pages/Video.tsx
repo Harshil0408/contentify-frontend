@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { socket } from "@/utils/socket";
-import { getSingleVideo, getRecommandedVideosForUser, toggleLikeVideo, toggleSubscribeVideo, getVideoWatchProgress, updateVideoWatchProgress } from "@/store/thunks/videoThunk";
+import { getSingleVideo, getRecommandedVideosForUser, toggleLikeVideo, toggleSubscribeVideo, getVideoWatchProgress } from "@/store/thunks/videoThunk";
 import type { AppDispatch, RootState } from "@/store/store";
 import VideoPlayer from "@/components/VideoPlayer";
 import VideoActions from "@/components/VideoActions";
@@ -29,8 +28,7 @@ const Video = () => {
         const now = Date.now();
         if (now - lastSentTime < 15000 && currentTime !== duration) return;
         setLastSentTime(now);
-
-        await dispatch(updateVideoWatchProgress({ videoId, watchedTime: Math.floor(currentTime) }));
+        // await dispatch(updateVideoWatchProgress({ videoId, watchedTime: Math.floor(currentTime) }));
     }, [videoId, lastSentTime]);
 
     const handleLike = async () => {
@@ -46,13 +44,8 @@ const Video = () => {
     const handleSubscribe = async () => {
         if (!singleVideo?.owner?._id) return;
         try {
-            const response = await dispatch(toggleSubscribeVideo(singleVideo.owner._id)).unwrap();
-            if (response.message === "Channel subscribed") {
-                socket.emit("new-subscription", {
-                    channelId: singleVideo?.owner._id,
-                    videoTitle: singleVideo?.title,
-                });
-            }
+            await dispatch(toggleSubscribeVideo(singleVideo.owner._id)).unwrap();
+
         } catch (error) {
             console.log(error);
         }

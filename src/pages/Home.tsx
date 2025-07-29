@@ -14,7 +14,7 @@ const Home = () => {
     useEffect(() => {
         dispatch(getAllVideos());
         dispatch(getVideoWatchProgress())
-    }, [dispatch]);
+    }, []);
 
 
     if (error) {
@@ -36,7 +36,7 @@ const Home = () => {
     return (
         <div className="max-w-[1300px] mx-auto px-4 py-8">
             <div className="flex flex-wrap justify-start gap-x-6 gap-y-10">
-                {allVideos?.docs?.map((video) => (
+                {allVideos && allVideos.docs && allVideos.docs.map((video) => (
                     <VideoCard key={video._id} video={video} />
                 ))}
             </div>
